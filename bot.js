@@ -211,6 +211,15 @@ function get_online_helpers(msg)
 		   }
 		   else 
 			   console.log(`[ERROR]SQL Error(HELPERcheck):${err}`);
+			   	});
+  
+	} else if (!permcheck) {
+		msg.reply("This command can only be used the admin bot channel.");
+	} else {
+		msg.channel.send("Usage : /sban [BAN-ID/InGame-Name].");
+	}
+	
+}
 //@audit-info Online Admins
 function get_online_admins(msg)
 {

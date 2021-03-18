@@ -189,7 +189,7 @@ function get_online_helpers(msg)
 					let i = 0, helpers = "";
 
 					for (; i < row.length; i++) {
-						helpers += `${row[i].Nick}: ${row[i].Helper}\n`;
+						helpers += `${row[i].Nick}: ${row[i].HelperLv}\n`;
 					}
 					
 	
@@ -200,7 +200,7 @@ function get_online_helpers(msg)
 							title: `List of In-game Helpers`,
 							color: embedColor,
 							fields: [
-								{ name: 'Helper', value: helpers, inline: true }
+								{ name: 'Helper', value: helpers, inline: true },
 							],
 						}
 					}

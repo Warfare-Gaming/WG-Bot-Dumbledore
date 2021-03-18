@@ -176,7 +176,7 @@ function get_online_helpers(msg)
     {
 		var sqlq;
 		
-		sqlq = "SELECT `id`,`Nick`,`Online`,`Helper` FROM `Accounts` WHERE `Helper` = 0 AND `Online` = 1";
+		sqlq = "SELECT `id`,`Nick`,`Online`,`HelperLv` FROM `Accounts` WHERE `HelperLv` = 1 AND `Online` = 1";
 		
 
 		db.query(sqlq,

@@ -186,7 +186,7 @@ function get_online_helpers(msg)
 					console.log(sqlq);
 				if(row.length)
 				{
-					let i = 0, ehlpers = "";
+					let i = 0, helpers = "";
 
 					for (; i < row.length; i++) {
 						helpers += `${row[i].Nick}: ${row[i].Helper}\n`;

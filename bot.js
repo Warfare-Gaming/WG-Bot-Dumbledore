@@ -200,7 +200,7 @@ function get_online_helpers(msg)
 							title: `List of In-game Helpers`,
 							color: embedColor,
 							fields: [
-								{ name: 'Helper', value: helpers, inline: true },
+								{ name: 'Helper', value: helpers, inline: true }
 							],
 						}
 					}

@@ -80,6 +80,7 @@ function toggle_debug()
 //@audit-info Verify System
 
 client.on("guildMemberAdd", member => {
+	let server = client.guilds.cache.get('710189407428280331');
 	var memberRole= server.roles.cache.find(role => role.name === "Verified");
 	var unverifiedRole= server.roles.cache.find(role => role.name === "Unverified");
 	if (Date.now() - member.user.createdAt < 1000*60*60*24*30) {

@@ -78,6 +78,14 @@ function toggle_debug()
 }
 //________________________[User Verification System]_______________________
 //@audit-info Verify System
+
+client.on("guildMemberAdd", member => {
+	var memberRole= server.roles.cache.find(role => role.name === "Verified");
+	var unverifiedRole= server.roles.cache.find(role => role.name === "Unverified");
+	if (Date.now() - member.user.createdAt < 1000*60*60*24*30) {
+	  member.roles.add(unverifiedRole);
+	}else member.roles.add(memberRole);
+  });
 function verify_user(msg,params) 
 {	
 	if (msg.guild)

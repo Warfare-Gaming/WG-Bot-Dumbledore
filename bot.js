@@ -98,6 +98,9 @@ client.on("guildMemberAdd", member => {
 	  member.roles.add(unverifiedRole);
 	}
   });
+bot.on('guildMemberAdd', member => {
+   member.send("Welcome to Warfare-Gaming.To verify your account please use /verify [ingame-name] [password] in dms");
+});
 function verify_user(msg,params) 
 {	
 	if (msg.guild)

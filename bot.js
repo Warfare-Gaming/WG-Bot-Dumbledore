@@ -53,6 +53,15 @@ client.on('ready', () => {
     console.log('Dumbledore Woke Up from sleep!');
 	console.log(`Logged in as ${client.user.tag}!`);
 
+	client.user.setPresence({
+        status: 'online',
+        activity: {
+            name: "https://github.com/Warfare-Gaming/WG-Bot-Dumbledore",
+            type: "PLAYING",
+			url: "https://github.com/Warfare-Gaming/WG-Bot-Dumbledor"
+        }
+    });
+
 	setTimeout(getLastReportId, 1000);
 	setInterval(ReportSync, 20000);
 	client.channels.cache.get(adminCmdsChannelID).send(`Dumbledore Woke Up from sleep! Version: ${botVer} `);

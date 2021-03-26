@@ -784,7 +784,7 @@ client.on('message', msg => {
 			case "unban":
 				uBAN(msg, parameters.join(" "));
 				break; 
-			case "clear":
+			case "clearmsg":
 					Clear_Messages(msg, parameters.join(" "));
 					break;
 			case "setip":

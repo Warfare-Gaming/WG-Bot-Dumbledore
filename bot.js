@@ -12,19 +12,13 @@ const client = new Discord.Client();
 
 var query = require('samp-query');
 
-var crypto = require('crypto');
-//creating hash object 
-
-
 //_____________________________[BOT Configuration]_________________________________________
 //@audit Settings
 
-const botVer = "2.1.3";
 const botChar = "/"; // Bot prefix character
 let Samp_IP = "51.178.138.254";
 let Samp_Port = 7777;
 let Community_Tag ="WG";
-
 
 let userToSubmitApplicationsTo = '710195458680684695';//Default Channel Id for User Applications
 let reportChannelID = '714432112031170562'; // Channel for the ingam reports
@@ -46,20 +40,15 @@ var db = mysql.createConnection({
     database: process.env.SQL_DB,
 });
 
+
 //_______________________________[BOT Startup]_________________________________________________
 //@audit-ok Client Ready
 client.on('ready', () => {
 
     console.log('Dumbledore Woke Up from sleep!');
 	console.log(`Logged in as ${client.user.tag}!`);
-
 	setTimeout(getLastReportId, 1000);
 	setInterval(ReportSync, 20000);
-	client.channels.cache.get(adminCmdsChannelID).send(`Dumbledore Woke Up from sleep! Version: ${botVer} `);
-	if (Bot_debug_mode)
-	{
-		client.channels.cache.get(adminCmdsChannelID).send("Disclaimer: Bot Currently In Development Mode , might be unstable");
-	} 
 	
 
 });
@@ -70,100 +59,12 @@ function toggle_debug()
 	{
 	  Bot_debug_mode = false;
 	  console.log(`[DEBUG]: Debug Mode Disabled`);
-	  return;
 	} 
-	Bot_debug_mode = true;
-	console.log(`[DEBUG]: Debug Mode Enabled`);
-	
-}
-//________________________[User Verification System]_______________________
-//@audit-info Verify System
-function verify_user(msg,params) 
-{	
-	if (msg.guild)
-	{	
-		msg.author.send("Welcome to Warfare Gaming. To verify your account use /verify");
-		msg.author.send("Usage: /verify [ingame-name] [password]");
-		return msg.reply("You can only you this cmd in DM\n Do you want your pass to be visible to everyone ?\n If no please DM me /verify \nUsage: /verify [ingame-name] [password]");
-	} 
-	if(!params[0] || !params[1]) return msg.channel.send("Usage: /verify [ingame-name] [password]");
-	
-	var uname = params[0],
-	pass = params[1],
-	user_salt = "SALT_HERE",
-	user_hash = "HASH_HERE";
-
-	db.query("SELECT * FROM Accounts WHERE Nick = ? LIMIT 1",
-		[uname], function(err,row) {
-			if(!row) return console.log(`[ERROR]SQL Error(Verify):${err}`);
-			if(!row.length) return msg.channel.send(`No User Account found : ${uname}`);
-		
-			user_salt = row[0].Salt;
-			user_hash = row[0].Password;
-			var hash = crypto.createHash('whirlpool');
-			data = hash.update(`${user_salt}${pass}`, 'utf-8');
-			gen_hash= data.digest('hex');
-
-			if(gen_hash.toUpperCase() !== user_hash) return msg.channel.send("Password Is Incorrect");
-			if(row[0].Score < 500) return msg.channel.send(`You currentlu have only ${row[0].Score} Score. Minimum score needed for verification 500`);
-			check_verify_status(row,msg);
-
-	});
-	
-	
-}
-function set_user_verified(msg,ingame_id) 
-{
-	userid = msg.author.id;
-	let server = client.guilds.cache.get('710189407428280331');
-	var memberRole= server.roles.cache.find(role => role.name === "Verified");
-	let member = server.members.cache.get(userid);
-
-	
-	db.query("INSERT INTO `discord_verification` (`Ingame_Id`, `Discord_Id`) VALUES (?, ?)",
-	[ingame_id,userid], function(err,row) {
-		if(err){
-			msg.channel.send("Discord ID already Verifed to another user");
-			msg.channel.send("Verification Failed");
-			return;
-		}	
-		member.roles.add(memberRole);
-		const embedColor = 0x00ff00;
-					
-		const logMessage = {
-			embed: {
-				title: "Account Sucessfully Verfied",
-				color: embedColor,
-				fields: [
-					{ name: 'Inagme Account ID', value: ingame_id, inline: true },
-				],
-			}
-		}
-		msg.channel.send(logMessage);
-		return 1;		
-	});
-	return 1;
-}
-function check_verify_status(results,msg) {
-
-
-	db.query("SELECT * FROM discord_verification WHERE Ingame_Id = ? LIMIT 1",
-	[results[0].id], function(err,row) {
-		if(!row){
-		console.log(`[ERROR]SQL Error(Verify):${err}`);
-		msg.channel.send("Verification Failed Contact Admin");
-		return;
-		}
-		if(row.length){
-		if(msg.author.id == row[0].Discord_Id)	return msg.channel.send("Dont waste my time noob you are already verified");
-		msg.channel.send(`The Ingame Account ${results[0].Nick} is already linked to Discord ID: ${row[0].Discord_Id}`);	
-		msg.channel.send("If this is a mistake please contact Admins");
-		msg.channel.send("Verification Failed");
-		return;
-		}
-		set_user_verified(msg,results[0].id)
-	});
-
+	else 
+	{
+	  Bot_debug_mode = true;
+	  console.log(`[DEBUG]: Debug Mode Enabled`);
+	}
 }
 
 //________________________[Inagme Report Sync]_____________________________
@@ -173,11 +74,15 @@ function getLastReportId()
 {
     db.query("SELECT * FROM `log_reports` ORDER BY `log_reports`.`id` DESC LIMIT 1",
      [], function(err,row) {
-		if(!row) return console.log(`[ERROR]SQL Error(GetLastReportId):${err}`);
-		
-		last_report = parseInt(row[0].id);
-		if(Bot_debug_mode)
-			console.log(`[DEBUG]Last Report id:${last_report}`);
+		if(row)
+		{ 
+			last_report = parseInt(row[0].id);
+			if(Bot_debug_mode)
+				console.log(`[DEBUG]Last Report id:${last_report}`);
+		}
+		else 
+			console.log(`[ERROR]SQL Error(GetLastReportId):${err}`);
+	
 	});
 
 }
@@ -185,25 +90,31 @@ function ReportSync()
 {
     db.query(`SELECT * FROM log_reports WHERE id > ${last_report}`,
      [], function(err,row) {
-		if(!row) return console.log(`[ERROR]SQL Error(GetLastReportId):${err}`); 
-		if(!row.length && Bot_debug_mode) return console.log(`[DEBUG] No New Reports Found Using ${last_report}`);
-		for (var i = 0; i < row.length; i++) 
-		{
-			last_report = parseInt(row[i].id);
-			const embedColor = 0xff0000;
+		if(row)
+		{ 
+			for (var i = 0; i < row.length; i++) 
+			{
+				last_report = parseInt(row[i].id);
+				const embedColor = 0xff0000;
 			
-			const logMessage = {
-				embed: {
-					title: row[i].report,
-					color: embedColor,
-					fields: [
-						{ name: 'Time:', value: row[i].time, inline: true },
-					],
-				}
-			};
-			client.channels.cache.get(reportChannelID).send(logMessage);
+				const logMessage = {
+					embed: {
+						title: row[i].report,
+						color: embedColor,
+						fields: [
+							{ name: 'Time:', value: row[i].time, inline: true },
+						],
+					}
+				};
+				client.channels.get(reportChannelID).send(logMessage);
 			
-		}		
+			}
+			if(!row.length && Bot_debug_mode)
+				console.log(`[DEBUG] No New Reports Found Using ${last_report}`)
+		}
+		else 
+			console.log(`[ERROR]SQL Error(GetLastReportId):${err}`);
+	
 	});
 
 }
@@ -213,8 +124,8 @@ function GetPlayersOnline(msg)
 	var options = {
 		host: Samp_IP,
 		port: Samp_Port
-	};
-
+	}
+	//console.log(options.host)
 	query(options, function (error, response) {
 		if(error)
 		{
@@ -261,82 +172,106 @@ function GetPlayersOnline(msg)
 function get_online_helpers(msg)
 {
 	permcheck = (msg.channel.id === adminCmdsChannelID) ? true : false;
-
-	if(!permcheck) return msg.reply("This command can only be used the admin bot channel.");
+	if (permcheck) 
+    {
+		var sqlq;
 		
-	var sqlq = "SELECT `id`,`Nick`,`Online`,`HelperLv` FROM `Accounts` WHERE `HelperLv` = 1 AND `Online` = 1";	
-
-	db.query(sqlq,
-	[], function(err,row) {
+		sqlq = "SELECT `id`,`Nick`,`Online`,`HelperLv` FROM `Accounts` WHERE `HelperLv` = 1 AND `Online` = 1";
 		
-		if(Bot_debug_mode)
-			console.log(sqlq);
-		if(!row) return console.log(`[ERROR]SQL Error(HELPERcheck):${err}`);
-		if(!row.length) return client.channels.cache.get(adminCmdsChannelID).send("No helpers online !!!");	
-	
-		let i = 0, helpers = "";
 
-		for (; i < row.length; i++) {
-			helpers += `${row[i].Nick}: ${row[i].HelperLv}\n`;
-		}
-				
+		db.query(sqlq,
+		[], function(err,row) {
+		   if(row)
+		   { 	if(Bot_debug_mode)
+					console.log(sqlq);
+				if(row.length)
+				{
+					let i = 0, helpers = "";
+
+					for (; i < row.length; i++) {
+						helpers += `${row[i].Nick}: ${row[i].HelperLv}\n`;
+					}
+					
 	
-		const embedColor = 0xffff00;
+					const embedColor = 0xffff00;
 			
-		const logMessage = {
-			embed: {
-				title: `List of In-game Helpers`,
-				color: embedColor,
-				fields: [
-					{ name: 'Helper', value: helpers, inline: true },
-				],
-			}
-		};
-		client.channels.cache.get(adminCmdsChannelID).send(logMessage);
-	});
+					const logMessage = {
+						embed: {
+							title: `List of In-game Helpers`,
+							color: embedColor,
+							fields: [
+								{ name: 'Helper', value: helpers, inline: true },
+							],
+						}
+					}
+					client.channels.get(adminCmdsChannelID).send(logMessage);
+				}
+				else
+				client.channels.get(adminCmdsChannelID).send("No helpers online !!!");   
+		   }
+		   else 
+			   console.log(`[ERROR]SQL Error(HELPERcheck):${err}`);
+			   	});
   
-	
+	} else if (!permcheck) {
+		msg.reply("This command can only be used the admin bot channel.");
+	} else {
+		msg.channel.send("Usage : /sban [BAN-ID/InGame-Name].");
+	}
 	
 }
 //@audit-info Online Admins
 function get_online_admins(msg)
 {
 	permcheck = (msg.channel.id === adminCmdsChannelID) ? true : false;
-	if(!permcheck) return msg.reply("This command can only be used the admin bot channel.");
-
+	if (permcheck) 
+    {
+		var sqlq;
 		
-	var	sqlq = "SELECT `id`,`Nick`,`Online`,`Admin` FROM `Accounts` WHERE `Admin` > 0 AND `Online` = 1 ORDER BY `Accounts`.`Admin` DESC";
+		sqlq = "SELECT `id`,`Nick`,`Online`,`Admin` FROM `Accounts` WHERE `Admin` > 0 AND `Online` = 1 ORDER BY `Accounts`.`Admin` DESC";
 		
 
-	db.query(sqlq,
-	[], function(err,row) {
-		if(!row) return console.log(`[ERROR]SQL Error(ADMcheck):${err}`);
-		if(!row.length) return client.channels.cache.get(adminCmdsChannelID).send("No admins online !!!"); 
-		
-		if(Bot_debug_mode)
-			console.log(sqlq);
+		db.query(sqlq,
+		[], function(err,row) {
+		   if(row)
+		   { 	if(Bot_debug_mode)
+					console.log(sqlq);
+				if(row.length)
+				{
+					let i = 0, admins = "";
 
-		let i = 0, admins = "";
-
-		for (; i < row.length; i++) {
-			admins += `${row[i].Nick}: ${row[i].Admin}\n`;
-		}
-
-		const embedColor = 0xffff00;
+					for (; i < row.length; i++) {
+						admins += `${row[i].Nick}: ${row[i].Admin}\n`;
+					}
+					
+	
+					const embedColor = 0xffff00;
 			
-		const logMessage = {
-			embed: {
-				title: `List of In-game Admins`,
-				color: embedColor,
-				fields: [
-					{ name: 'Admins', value: admins, inline: true },
-				],
-			}
-		};
-		client.channels.cache.get(adminCmdsChannelID).send(logMessage);	   
+					const logMessage = {
+						embed: {
+							title: `List of In-game Admins`,
+							color: embedColor,
+							fields: [
+								{ name: 'Admins', value: admins, inline: true },
+							],
+						}
+					}
+					client.channels.get(adminCmdsChannelID).send(logMessage);
+				}
+				else
+				client.channels.get(adminCmdsChannelID).send("No admins online !!!");   
+		   }
+		   else 
+			   console.log(`[ERROR]SQL Error(ADMcheck):${err}`);
 	   
-	});
-
+	   	});
+  
+	} else if (!permcheck) {
+		msg.reply("This command can only be used the admin bot channel.");
+	} else {
+		msg.channel.send("Usage : /sban [BAN-ID/InGame-Name].");
+	}
+	
 }
 //@audit-info BAN Functions
 function sBAN(msg,params)
@@ -347,7 +282,7 @@ function sBAN(msg,params)
 		var sqlq;
 		if(!isNaN(params))
 			sqlq = `SELECT * FROM banlog WHERE name = '${params}' OR id = '${params}' LIMIT 1`;
-		sqlq = `SELECT * FROM banlog WHERE name = '${params}' LIMIT 1`;
+		else sqlq = `SELECT * FROM banlog WHERE name = '${params}' LIMIT 1`;
 
 		db.query(sqlq,
 		[], function(err,row) {
@@ -372,10 +307,10 @@ function sBAN(msg,params)
 							],
 						}
 					}
-					client.channels.cache.get(adminCmdsChannelID).send(logMessage);
+					client.channels.get(adminCmdsChannelID).send(logMessage);
 				}
 				else
-				client.channels.cache.get(adminCmdsChannelID).send("No ban found !!!");   
+				client.channels.get(adminCmdsChannelID).send("No ban found !!!");   
 		   }
 		   else 
 			   console.log(`[ERROR]SQL Error(sBAN):${err}`);
@@ -413,7 +348,7 @@ function uBAN(msg,params)
 					
 				}
 				else
-				client.channels.cache.get(adminCmdsChannelID).send("No ban found !!!");   
+				client.channels.get(adminCmdsChannelID).send("No ban found !!!");   
 		   }
 		   else 
 			   console.log(`[ERROR]SQL Error(uBAN):${err}`);
@@ -439,7 +374,7 @@ function uBAN_Process(banid)
 		{ 	
 			if(Bot_debug_mode)
 				console.log(sqlq);
-			client.channels.cache.get(adminCmdsChannelID).send(`The user has been unbanned`); 
+			client.channels.get(adminCmdsChannelID).send(`The user has been unbanned`); 
 		}
 		else 
 			console.log(`[ERROR]SQL Error(uBAN_Process):${err}`);
@@ -470,7 +405,7 @@ const applicationFormCompleted = (data) => {
             ],
         }
     }
-    client.channels.cache.get(userToSubmitApplicationsTo).send(logMessage);
+    client.channels.get(userToSubmitApplicationsTo).send(logMessage);
 };
 
 const addUserToRole = (msg, roleName) => {
@@ -483,7 +418,7 @@ const addUserToRole = (msg, roleName) => {
 		const role = msg.guild.roles.find("name", roleName);
 
 		if (!role) {
-			msg.member.roles.add(role);
+			msg.member.addRole(role);
 
 			msg.reply(`Added you to role: '${roleName}'`);
 		} else {
@@ -582,12 +517,12 @@ const Clear_Messages = (msg,amount) => {
 	if (amount > 100) return msg.reply('You can`t delete more than 100 messages at once!'); 
 	if (amount < 1) return msg.reply('You have to delete at least 1 message!'); 
 
-	const member = msg.guild.member(msg.author);
-	if (!msg.guild.member(msg.author).hasPermission("MANAGE_MESSAGES")) 
+
+	if (!msg.channel.permissionsFor(msg.author).hasPermission("MANAGE_MESSAGES")) 
 	{
         msg.channel.sendMessage("Sorry, you don't have the permission to execute the command \""+msg.content+"\"");
         return;
-	} else if (!msg.guild.member(client.user).hasPermission("MANAGE_MESSAGES")) 
+	} else if (!msg.channel.permissionsFor(client.user).hasPermission("MANAGE_MESSAGES")) 
 	{
         msg.channel.sendMessage("Sorry, I don't have the permission to execute the command \""+msg.content+"\"");
         return;
@@ -595,7 +530,7 @@ const Clear_Messages = (msg,amount) => {
 
     
     if (msg.channel.type == 'text') {
-        msg.channel.messages.fetch({limit : amount})
+        msg.channel.fetchMessages({limit : amount})
           .then(messages => {
             msg.channel.bulkDelete(messages);
             messagesDeleted = messages.array().length;
@@ -802,11 +737,8 @@ client.on('message', msg => {
 					get_online_admins(msg)
 					break;
 			case "helpers":
-				    get_online_helpers(msg)
-				    break;
-			case "verify":
-					verify_user(msg, parameters)
-					break;	
+				        get_online_helpers(msg)
+				        break;
 			default:
 				
 		}

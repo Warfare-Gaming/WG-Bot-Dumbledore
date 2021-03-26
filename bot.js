@@ -219,7 +219,7 @@ function PlayerInfo(msg,params)
 		}
 		msg.channel.send(logMessage);
 	});
-	msg.channel.send('test');
+
 }
 //________________________[Inagme Report Sync]_____________________________
 //@audit-info Report Sys

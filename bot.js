@@ -29,6 +29,7 @@ let Community_Tag ="WG";
 let userToSubmitApplicationsTo = '710195458680684695';//Default Channel Id for User Applications
 let reportChannelID = '714432112031170562'; // Channel for the ingam reports
 let adminCmdsChannelID = '710195250911641741'; // Admin Cmds channel
+let botCmdsChannelID = '710194727898579014'; // BOT Cmds channel
 let Bot_debug_mode = false;
 
 //_______________________________[APPLICATIONS]______________________________________________
@@ -39,6 +40,7 @@ let isSettingFormUp = false;
 
 //______________________________[SAMP Server MySQL Connection]________________________________
 const mysql = require("mysql");
+const { promises } = require('dns');
 var db = mysql.createConnection({
     host: process.env.SQL_HOST,
     user: process.env.SQL_USER,
@@ -186,6 +188,39 @@ function check_verify_status(results,msg) {
 
 }
 
+
+//________________________[FUN STUFF& MISC STUFF]__________________________
+//@audit-info Fun CMDS
+function PlayerInfo(msg,params)
+{
+	permcheck = (msg.channel.id === botCmdsChannelID) ? true : false;
+
+	if(!permcheck) return msg.channel.send("This command can only be used in #bit-cmds channel");
+	if (!params) return msg.channel.send("Usage: /playerinfo [inagme-name]");
+	
+	db.query("SELECT * FROM Accounts WHERE Nick = ? LIMIT 1",
+     [params], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(PlayerInfo):${err}`);
+		if(!row.length) return msg.channel.send("No user found with that name");
+		const embedColor = 0xffff00;
+		kd_ratio = row[0].Kills/row[0].Deaths;
+		profile_url = `https://ucp.warfare-gaming.com/website/player-info?p=${row[0].id}`
+		const logMessage = {
+			embed: {
+				title: `Account Information for User: ${row[0].Nick}`,
+				color: embedColor,
+				fields: [
+					{ name: 'Score', value: row[0].Score, inline: true },
+					{ name: 'Money', value: row[0].Money, inline: true },
+					{ name: 'K/D', value: kd_ratio, inline: true },
+					{ name: 'Profile', value: profile_url, inline: true },
+				],
+			}
+		}
+		msg.channel.send(logMessage);
+	});
+	msg.channel.send('test');
+}
 //________________________[Inagme Report Sync]_____________________________
 //@audit-info Report Sys
 var last_report = 0;
@@ -468,7 +503,25 @@ function uBAN_Process(banid)
   
 	
 }
+function Offline_Ban(msg,params) {
+	permcheck = (msg.channel.id === adminCmdsChannelID) ? true : false;
+	if(!permcheck) return msg.reply("This command can only be used the admin bot channel.");
+	if(!params[0] || !params[1]) return msg.channel.send("Usage: /offlineban [ingame-name] [reason]");
+	
+	var offender = params[0],
+	reason = params[1];
 
+	db.query("INSERT INTO `banlog` (`id`, `name`, `admin`, `ip`, `iprange`, `gpci`, `reason`, `time`, `bantime`) VALUES (NULL, ?, ?, 'Game-Ban', '0.0.0.', 'Game Ban', ?, CURRENT_TIMESTAMP, UNIX_TIMESTAMP(now())+2592000)",
+	[offender,msg.author.username,reason], function(err,row) {
+		if(err){
+			msg.channel.send("Could Not ban user please try gain later");
+			return;
+		}	
+		sBAN(msg,offender);
+		return 1;		
+	});
+
+}
 
 //_____________________[APPLICATION SYSTEM FUCNTIONS]_____________________________________
 
@@ -826,7 +879,13 @@ client.on('message', msg => {
 				    break;
 			case "verify":
 					verify_user(msg, parameters)
-					break;	
+					break;
+			case "offlineban":
+					Offline_Ban(msg, parameters)
+					break;
+			case "playerinfo":
+					PlayerInfo(msg, parameters.join(" "))
+					break;							
 			default:
 				
 		}

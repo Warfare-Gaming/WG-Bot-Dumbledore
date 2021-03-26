@@ -221,6 +221,24 @@ function PlayerInfo(msg,params)
 	});
 
 }
+function PlayerSign(msg,params)
+{
+	permcheck = (msg.channel.id === botCmdsChannelID) ? true : false;
+
+	if(!permcheck) return msg.channel.send("This command can only be used in #bit-cmds channel");
+	if (!params) return msg.channel.send("Usage: /signature [inagme-name]");
+	
+	db.query("SELECT * FROM Accounts WHERE Nick = ? LIMIT 1",
+     [params], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(signature):${err}`);
+		if(!row.length) return msg.channel.send("No user found with that name");
+
+		profile_url = `https://ucp.warfare-gaming.com/website/signature/u/${row[0].id}`
+
+		msg.channel.send(profile_url);
+	});
+
+}
 //________________________[Inagme Report Sync]_____________________________
 //@audit-info Report Sys
 var last_report = 0;
@@ -774,8 +792,8 @@ const helpinfo = (msg) => {
 		return;
 	}
 	const embedColor = 0xffff00;
-	pcmds = `\`\`\`${botChar}apply, ${botChar}players, ${botChar}ip, ${botChar}help\`\`\``;
-	acmds = `\`\`\`${botChar}setip, ${botChar}setport, ${botChar}setchannel, ${botChar}setup, ${botChar}sban, ${botChar}unban, ${botChar}clear\`\`\``;
+	pcmds = `\`\`\`${botChar}apply, ${botChar}players, ${botChar}ip, ${botChar}playerinfo, ${botChar}verify, ${botChar}help\`\`\``;
+	acmds = `\`\`\`${botChar}setip, ${botChar}setport, ${botChar}setchannel, ${botChar}offlineban, ${botChar}sban, ${botChar}unban, ${botChar}clearmsg\`\`\``;
 
     const logMessage = {
         embed: {
@@ -885,7 +903,10 @@ client.on('message', msg => {
 					break;
 			case "playerinfo":
 					PlayerInfo(msg, parameters.join(" "))
-					break;							
+					break;
+			case "signature":
+					PlayerSign(msg, parameters.join(" "))
+					break;									
 			default:
 				
 		}

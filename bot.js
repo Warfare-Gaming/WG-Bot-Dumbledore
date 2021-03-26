@@ -117,6 +117,7 @@ function set_user_verified(msg,ingame_id)
 	userid = msg.author.id;
 	let server = client.guilds.cache.get('710189407428280331');
 	var memberRole= server.roles.cache.find(role => role.name === "Verified");
+	var unverifiedRole= server.roles.cache.find(role => role.name === "Unverified");
 	let member = server.members.cache.get(userid);
 
 	
@@ -128,6 +129,7 @@ function set_user_verified(msg,ingame_id)
 			return;
 		}	
 		member.roles.add(memberRole);
+		member.roles.remove(unverifiedRole);
 		const embedColor = 0x00ff00;
 					
 		const logMessage = {
@@ -347,7 +349,7 @@ function sBAN(msg,params)
 		var sqlq;
 		if(!isNaN(params))
 			sqlq = `SELECT * FROM banlog WHERE name = '${params}' OR id = '${params}' LIMIT 1`;
-		sqlq = `SELECT * FROM banlog WHERE name = '${params}' LIMIT 1`;
+		else sqlq = `SELECT * FROM banlog WHERE name = '${params}' LIMIT 1`;
 
 		db.query(sqlq,
 		[], function(err,row) {
@@ -585,11 +587,11 @@ const Clear_Messages = (msg,amount) => {
 	const member = msg.guild.member(msg.author);
 	if (!msg.guild.member(msg.author).hasPermission("MANAGE_MESSAGES")) 
 	{
-        msg.channel.sendMessage("Sorry, you don't have the permission to execute the command \""+msg.content+"\"");
+        msg.channel.send("Sorry, you don't have the permission to execute the command \""+msg.content+"\"");
         return;
 	} else if (!msg.guild.member(client.user).hasPermission("MANAGE_MESSAGES")) 
 	{
-        msg.channel.sendMessage("Sorry, I don't have the permission to execute the command \""+msg.content+"\"");
+        msg.channel.send("Sorry, I don't have the permission to execute the command \""+msg.content+"\"");
         return;
     }
 
@@ -600,7 +602,7 @@ const Clear_Messages = (msg,amount) => {
             msg.channel.bulkDelete(messages);
             messagesDeleted = messages.array().length;
 
-            msg.channel.sendMessage("Deletion of messages successful. Total messages deleted: "+messagesDeleted);
+            msg.channel.send("Deletion of messages successful. Total messages deleted: "+messagesDeleted);
             console.log('Deletion of messages successful. Total messages deleted: '+messagesDeleted)
           })
           .catch(err => {

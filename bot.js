@@ -9,7 +9,7 @@
 //______________________[Discord JS and SAMP Query Library]______________________________
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
+const MessageEmbed  = require('discord.js')
 var query = require('samp-query');
 
 var crypto = require('crypto');
@@ -829,7 +829,28 @@ client.on('message', msg => {
 
         msg.reply(`Server IP: ${Samp_IP}`);
  
-    }  
+    }
+  if (message.content === '/ighelp') {
+		message.reply('Please use /ighelp {option}\n1-In-Game rules\n2-How to play?\n3-In-Game commands')}
+		if(message.content=== "/ighelp 1"){
+		  let rules = new MessageEmbed()
+.setTitle("Command List")
+.setDescription("1-Any kind of mod that gives you advantages over players is not allowed\n2-Respect other players and especially admins\n3-You mustn't defame,swear, harass, insult,spam and flood\n4-Do not quit/pause during a fight to avoid death\n4-Using multiple account isn't allowed\n5-Do not abuse any bug and weapon glitch like c-bug, slide bug, 2 shots etc..(You can use them only in specefic arenas and duels only)\n6-Do not base rape\n7-Score farming is not allowed\nAdvertising or sharing other server ips, website links and any other way of gaining members may lead you to get banned")
+.setColor(0xffff00)
+message.reply(rules)
+}
+if(message.content ==="/ighelp 2"){
+  message.reply('Please check this website: https://ucp.warfare-gaming.com/website/how-to-play')
+}
+
+if(message.content==='/top'){
+  message.reply("Please check this website: https://ucp.warfare-gaming.com/website/top-list")
+}
+if(message.content==="/ighelp 3"){
+  message.reply("Please check this website: https://ucp.warfare-gaming.com/website/server-cmds")
+}
+
+
     //------------------------------[Medthod 2]-------------------------------------------
     if (msg.content.charAt(0) === botChar) {
 		const request = msg.content.substr(1);

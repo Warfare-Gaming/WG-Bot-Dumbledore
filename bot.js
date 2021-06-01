@@ -193,9 +193,9 @@ function check_verify_status(results,msg) {
 //@audit-info Fun CMDS
 function PlayerInfo(msg,params)
 {
-	permcheck = (msg.channel.id === botCmdsChannelID) ? true : false;
+	permcheck = (msg.guild) ? true : false;
 
-	if(!permcheck) return msg.channel.send("This command can only be used in #bit-cmds channel");
+	if(!permcheck) return msg.channel.send("This command can only be used in a channel");
 	if (!params) return msg.channel.send("Usage: /playerinfo [inagme-name]");
 	
 	db.query("SELECT * FROM Accounts WHERE Nick = ? LIMIT 1",
@@ -223,7 +223,7 @@ function PlayerInfo(msg,params)
 }
 function PlayerSign(msg,params)
 {
-	permcheck = (msg.channel.id === botCmdsChannelID) ? true : false;
+	permcheck = (msg.guild) ? true : false;
 
 	if(!permcheck) return msg.channel.send("This command can only be used in #bit-cmds channel");
 	if (!params) return msg.channel.send("Usage: /signature [inagme-name]");

@@ -92,11 +92,11 @@ function toggle_debug()
 
 client.on("guildMemberAdd", member => {
 	let server = client.guilds.cache.get('710189407428280331');
-	var memberRole= server.roles.cache.find(role => role.name === "Verified");
+	var memberRole= server.roles.cache.find(role => role.name === "Member");
 	var unverifiedRole= server.roles.cache.find(role => role.name === "Unverified");
 	if (Date.now() - member.user.createdAt < 1000*60*60*24*30) {
 	  member.roles.add(unverifiedRole);
-	}
+	}else member.roles.add(memberRole);
   });
 function verify_user(msg,params) 
 {	

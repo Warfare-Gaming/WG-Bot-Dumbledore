@@ -70,6 +70,8 @@ client.on('ready', () => {
 	setInterval(ReportSync, 20000);
 	setTimeout(getLastBanId, 2000);
 	setInterval(BanSync, 25000);
+	setTimeout(getLastCmdId, 3000);
+	setInterval(CmdSync, 30000);
 	client.channels.cache.get(adminCmdsChannelID).send(`Dumbledore Woke Up from sleep! Version: ${botVer} `);
 	if (Bot_debug_mode)
 	{
@@ -270,7 +272,40 @@ function BanSync()
 			last_ban_id = parseInt(row[i].id);
 			
 			client.channels.cache.get(banlogChannelID).send(`${row[i].name} Banned By ${row[i].admin} for ${row[i].reason}`);
+			client.channels.cache.get(banlogChannelID).send("------");
 			
+		}
+				
+	});
+
+}
+var last_cmd_id = 0;
+function getLastCmdId()
+{
+    db.query("SELECT * FROM `log_cmd` WHERE CMD != 'spec' AND CMD != 'announce' AND CMD != 'aduty' AND CMD != 'asay' AND CMD != 'msay' AND CMD != 'scv' AND CMD != 'unfair' AND CMD != 'hsay' AND CMD != 'adminarea' ORDER BY `log_cmd`.`id` DESC LIMIT 1",
+     [], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(GetLastCmdId):${err}`);
+		
+		last_cmd_id = parseInt(row[0].id);
+		if(Bot_debug_mode)
+			console.log(`[DEBUG]Last CMD id:${last_cmd_id}`);
+	});
+
+}
+
+function CmdSync()
+{
+    db.query(`SELECT * FROM log_cmd WHERE id > ${last_cmd_idd} AND CMD != 'spec' AND CMD != 'announce' AND CMD != 'aduty' AND CMD != 'asay' AND CMD != 'msay' AND CMD != 'scv' AND CMD != 'unfair' AND CMD != 'hsay' AND CMD != 'adminarea'`,
+     [], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(GetLastCmdId):${err}`); 
+		if(!row.length && Bot_debug_mode) return console.log(`[DEBUG] No New CMDs Found Using ${last_cmd_id}`);
+		for (var i = 0; i < row.length; i++) 
+		{
+			last_ban_id = parseInt(row[i].id);
+			
+
+			client.channels.cache.get(banlogChannelID).send(`${row[i].CMD} CMD Used By ${row[i].ByNick} On ${row[i].OnNick} Value ${row[i].Note}`);
+			client.channels.cache.get(banlogChannelID).send("------");
 		}
 				
 	});

@@ -271,7 +271,7 @@ function BanSync()
 		{
 			last_ban_id = parseInt(row[i].id);
 			
-			client.channels.cache.get(banlogChannelID).send(`${row[i].name} Banned By ${row[i].admin} for ${row[i].reason}`);
+			client.channels.cache.get(banlogChannelID).send(`**${row[i].name}** Banned By **${row[i].admin}** for **${row[i].reason}**`);
 			client.channels.cache.get(banlogChannelID).send("------");
 			
 		}
@@ -301,11 +301,11 @@ function CmdSync()
 		if(!row.length && Bot_debug_mode) return console.log(`[DEBUG] No New CMDs Found Using ${last_cmd_id}`);
 		for (var i = 0; i < row.length; i++) 
 		{
-			last_ban_id = parseInt(row[i].id);
+			last_cmd_id = parseInt(row[i].id);
 			
 
-			client.channels.cache.get(banlogChannelID).send(`${row[i].CMD} CMD Used By ${row[i].ByNick} On ${row[i].OnNick} Value ${row[i].Note}`);
-			client.channels.cache.get(banlogChannelID).send("------");
+			client.channels.cache.get(cmdlogChannelID).send(`**${row[i].CMD}** CMD Used By **${row[i].ByNick}** On **${row[i].OnNick}** Value **${row[i].Note}**`);
+			client.channels.cache.get(cmdlogChannelID).send("------");
 		}
 				
 	});

@@ -30,6 +30,8 @@ let userToSubmitApplicationsTo = '710195458680684695';//Default Channel Id for U
 let reportChannelID = '714432112031170562'; // Channel for the ingam reports
 let adminCmdsChannelID = '710195250911641741'; // Admin Cmds channel
 let botCmdsChannelID = '710194727898579014'; // BOT Cmds channel
+let banlogChannelID = '861415450914979881';
+let cmdlogChannelID = '861415314557894676';
 let Bot_debug_mode = false;
 
 //_______________________________[APPLICATIONS]______________________________________________
@@ -66,6 +68,8 @@ client.on('ready', () => {
 
 	setTimeout(getLastReportId, 1000);
 	setInterval(ReportSync, 20000);
+	setTimeout(getLastBanId, 2000);
+	setInterval(BanSync, 25000);
 	client.channels.cache.get(adminCmdsChannelID).send(`Dumbledore Woke Up from sleep! Version: ${botVer} `);
 	if (Bot_debug_mode)
 	{
@@ -239,7 +243,40 @@ function PlayerSign(msg,params)
 	});
 
 }
-//________________________[Inagme Report Sync]_____________________________
+//________________________[Inagme Logging XD ]_____________________________
+//@audit-info Log Sys
+var last_ban_id = 0;
+function getLastBanId()
+{
+    db.query("SELECT * FROM `banlog` admin != 'WWV-AC' ORDER BY `banlog`.`id` DESC LIMIT 1",
+     [], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(GetLastBanId):${err}`);
+		
+		last_ban_id = parseInt(row[0].id);
+		if(Bot_debug_mode)
+			console.log(`[DEBUG]Last Ban id:${last_ban_id}`);
+	});
+
+}
+
+function BanSync()
+{
+    db.query(`SELECT * FROM banlog WHERE id > ${last_ban_id} AND admin != 'WWV-AC'`,
+     [], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(GetLastBanId):${err}`); 
+		if(!row.length && Bot_debug_mode) return console.log(`[DEBUG] No New Bans Found Using ${last_ban_id}`);
+		for (var i = 0; i < row.length; i++) 
+		{
+			last_ban_id = parseInt(row[i].id);
+			
+			client.channels.cache.get(banlogChannelID).send(`${row[i].name} Banned By ${row[i].admin} for ${row[i].reason}`);
+			
+		}
+				
+	});
+
+}
+//________________________[Inagme Report Sync]___________________________ __
 //@audit-info Report Sys
 var last_report = 0;
 function getLastReportId()

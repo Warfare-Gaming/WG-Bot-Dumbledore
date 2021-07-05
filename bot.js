@@ -248,7 +248,7 @@ function PlayerSign(msg,params)
 var last_ban_id = 0;
 function getLastBanId()
 {
-    db.query("SELECT * FROM `banlog` admin != 'WWV-AC' ORDER BY `banlog`.`id` DESC LIMIT 1",
+    db.query("SELECT * FROM `banlog` WHERE admin != 'WWV-AC' ORDER BY `banlog`.`id` DESC LIMIT 1",
      [], function(err,row) {
 		if(!row) return console.log(`[ERROR]SQL Error(GetLastBanId):${err}`);
 		

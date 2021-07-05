@@ -295,7 +295,7 @@ function getLastCmdId()
 
 function CmdSync()
 {
-    db.query(`SELECT * FROM log_cmd WHERE id > ${last_cmd_idd} AND CMD != 'spec' AND CMD != 'announce' AND CMD != 'aduty' AND CMD != 'asay' AND CMD != 'msay' AND CMD != 'scv' AND CMD != 'unfair' AND CMD != 'hsay' AND CMD != 'adminarea'`,
+    db.query(`SELECT * FROM log_cmd WHERE id > ${last_cmd_id} AND CMD != 'spec' AND CMD != 'announce' AND CMD != 'aduty' AND CMD != 'asay' AND CMD != 'msay' AND CMD != 'scv' AND CMD != 'unfair' AND CMD != 'hsay' AND CMD != 'adminarea'`,
      [], function(err,row) {
 		if(!row) return console.log(`[ERROR]SQL Error(GetLastCmdId):${err}`); 
 		if(!row.length && Bot_debug_mode) return console.log(`[DEBUG] No New CMDs Found Using ${last_cmd_id}`);

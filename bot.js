@@ -919,7 +919,7 @@ client.on('message', msg => {
 			case "apply":
 				sendUserApplyForm(msg, parameters.join(" "));
 				break;
-			case "players":
+			case "playerss":
 				GetPlayersOnline(msg);
 				break;
 			case "cancel":

@@ -604,6 +604,9 @@ function Offline_Ban(msg,params) {
 	db.query("INSERT INTO `banlog` (`id`, `name`, `admin`, `ip`, `iprange`, `gpci`, `reason`, `time`, `bantime`) VALUES (NULL, ?, ?, 'Game-Ban', '0.0.0.', 'Game Ban', ?, CURRENT_TIMESTAMP, UNIX_TIMESTAMP(now())+2592000)",
 	[offender,msg.author.username,reason], function(err,row) {
 		if(err){
+			console.log(err);
+			msg.channel.send('Ahh shit here we go again');
+			msg.channel.send(err);
 			msg.channel.send("Could Not ban user please try gain later");
 			return;
 		}	

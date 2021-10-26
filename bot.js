@@ -568,7 +568,7 @@ function uBAN(msg,params)
 	} else if (!permcheck) {
 		msg.reply("This command can only be used the admin bot channel.");
 	} else {
-		msg.channel.send("Usage : /unban [BAN-ID/InGame-Name].");
+		msg.channel.send("Usage : /unbanplayer [BAN-ID/InGame-Name].");
 	}
 	
 }
@@ -868,7 +868,7 @@ const helpinfo = (msg) => {
 	}
 	const embedColor = 0xffff00;
 	pcmds = `\`\`\`${botChar}apply, ${botChar}players, ${botChar}ip, ${botChar}playerinfo, ${botChar}verify, ${botChar}help\`\`\``;
-	acmds = `\`\`\`${botChar}setip, ${botChar}setport, ${botChar}setchannel, ${botChar}offlineban, ${botChar}sban, ${botChar}unban, ${botChar}clearmsg\`\`\``;
+	acmds = `\`\`\`${botChar}setip, ${botChar}setport, ${botChar}setchannel, ${botChar}offlineban, ${botChar}sban, ${botChar}unbanplayer, ${botChar}clearmsg\`\`\``;
 
     const logMessage = {
         embed: {
@@ -947,7 +947,7 @@ client.on('message', msg => {
 			case "sban":
 				sBAN(msg, parameters.join(" "));
 				break; 
-			case "unban":
+			case "unbanplayer":
 				uBAN(msg, parameters.join(" "));
 				break; 
 			case "clearmsg":

@@ -450,6 +450,46 @@ function get_online_admins(msg)
 	if(!permcheck) return msg.reply("This command can only be used the admin bot channel.");
 
 		
+	var	sqlq = "SELECT `id`,`Nick`,`Online`,`Admin` FROM `Accounts` WHERE `Admin` > 0 AND `Online` = 1 AND `hidden_admin` = 0 ORDER BY `Accounts`.`Admin` DESC";
+		
+
+	db.query(sqlq,
+	[], function(err,row) {
+		if(!row) return console.log(`[ERROR]SQL Error(ADMcheck):${err}`);
+		if(!row.length) return client.channels.cache.get(adminCmdsChannelID).send("No admins online !!!"); 
+		
+		if(Bot_debug_mode)
+			console.log(sqlq);
+
+		let i = 0, admins = "";
+
+		for (; i < row.length; i++) {
+			admins += `${row[i].Nick}: ${row[i].Admin}\n`;
+		}
+
+		const embedColor = 0xffff00;
+			
+		const logMessage = {
+			embed: {
+				title: `List of In-game Admins`,
+				color: embedColor,
+				fields: [
+					{ name: 'Admins', value: admins, inline: true },
+				],
+			}
+		};
+		client.channels.cache.get(adminCmdsChannelID).send(logMessage);	   
+	   
+	});
+
+}
+//@audit-info Online Admins Total
+function get_online_admins_total(msg)
+{
+	permcheck = (msg.channel.id === adminCmdsChannelID) ? true : false;
+	if(!permcheck) return msg.reply("This command can only be used the admin bot channel.");
+
+		
 	var	sqlq = "SELECT `id`,`Nick`,`Online`,`Admin` FROM `Accounts` WHERE `Admin` > 0 AND `Online` = 1 ORDER BY `Accounts`.`Admin` DESC";
 		
 
@@ -966,6 +1006,9 @@ client.on('message', msg => {
 					break;				
             case "admins":
 					get_online_admins(msg)
+					break;            
+			case "totaladminlist":
+					get_online_admins_total(msg)
 					break;
 			case "helpers":
 				    get_online_helpers(msg)
